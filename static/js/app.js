@@ -36,9 +36,9 @@ depositElement.addEventListener("click", handleDeposit);
 //! Shoq user balances
 //shows bank balance
 const displayBalance = () => {
-  bankBalanceElement.innerText = `Amount : ${bankBalance}`;
+  bankBalanceElement.innerText = `Balance : ${bankBalance}`;
   bankDept.innerText = `Dept : ${currentLoan}`;
-  giveUserMoney.innerText = `Money earned : ${totalPay}`;
+  giveUserMoney.innerText = `Pay : $${totalPay}`;
 };
 
 //! deposit button will disabled at the beginning
@@ -192,11 +192,17 @@ const fetchImage = async image_Url => {
 const pcDetails = (selectedLaptop, images) => {
   const { title, description, price, specs } = selectedLaptop;
   pcDescription.innerHTML = `
-<h1> ${title} </h1>
+<h1> ${title} <span>$${price}</span></h1>
 <img class="productImage" width="100px" height="100px" src="${images}"/>
-<h3>Description : ${description}</h3>
-<span>Specs: ${specs} </span>
-<span>Price: ${price}$</span>
+<h3>${description}.</h3>
+<h3>Features: </h3>
+<ul> 
+${specs
+  .map(spec => {
+    return `<p class="pcList">${spec}</p>`;
+  })
+  .join("")}</ul> 
+  <br>
 <button id="buyBtn" class="buyBtn"> Buy now </button>
 `;
   buyBtn.addEventListener("click", () => buyPc(title, parseInt(price)));

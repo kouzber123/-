@@ -34,11 +34,15 @@ body {
   display: none;
 }
 button {
-  border-radius: 50px;
+  border-radius: 30px;
   padding: 6px;
 }
 
-ul {
+li {
   list-style: none;
+  float: left;
   margin-top: 10px;
+}
+.pcList {
+  float: none;
 }
