@@ -1,37 +1,32 @@
+import fetchApiData from "./api.js";
+import { showPcDetails } from "./pcShop.js";
+import { handlePurchase } from "./pcShop.js";
 //! to create shorthand elements
 const element = {
   create: element => document.createElement(element)
 };
-
 //! creates shortcut for these
 const create = {
   option: () => element.create("option")
 };
-
 //! WORK ELEMENTS
 const showUserMoney = document.querySelector("#paidMoney");
 const depositMoneyButton = document.querySelector("#deposit");
 const payMoneyButton = document.querySelector("#paybtn");
 const payLoanButton = document.querySelector("#payLoanBtn");
-
 //! BANK ELEMENTS
 const showBankBalance = document.querySelector("#bankBalance");
 const showBankDept = document.querySelector("#bankDept");
 const takeLoanButton = document.querySelector("#takeLoanBtn");
-
 //! SHOP ELEMENTS
-const pcDescription = document.querySelector("#pcDescription");
 const select = document.querySelector("#select");
-
 //! Variables
 let totalPay = 0;
 let bankBalance = 0;
 let currentLoan = 0;
-
 //! Event listeners
 payMoneyButton.addEventListener("click", addMoney);
 depositMoneyButton.addEventListener("click", handleDeposit);
-
 //! Show user balances
 //shows bank balance
 const displayBalance = () => {
@@ -79,7 +74,6 @@ payLoanButton.addEventListener("click", () => {
   if (totalPay == 0) {
     alert("You have to work first to pay loan...");
   }
-
   const deptLeft = totalPay - currentLoan;
   currentLoan -= totalPay;
   if (currentLoan <= 0) {
@@ -88,7 +82,6 @@ payLoanButton.addEventListener("click", () => {
     totalPay = 0;
     currentLoan = 0;
   }
-
   displayBalance();
 });
 
@@ -113,9 +106,8 @@ function handleLoan() {
       alert("Incorrect Value...");
       currentLoan = 0;
     }
-    //! max loan is the same as bank balance
+    //! max loan is the same as bank balance   //if loan is higher than balance
     if (currentLoan > bankBalance) {
-      //if loan is higher than balance
       alert("We cannot give that high a loan to you...");
     } else {
       bankBalance += currentLoan;
@@ -131,30 +123,21 @@ function handleLoan() {
   }
   displayBalance();
 }
-
 //! ----------------------------- PC SHOP AREA
 
 //! 1. first get api data then create option list with map add titles
 //! 2. get event of corresponding value and get detailed details
 //Setup Dom manipulation and fetch
 let laptops = [];
-let images = "";
-const url = "https://hickory-quilled-actress.glitch.me/computers";
 
-const fetchLaptops = async () => {
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    laptops = data;
-    laptops[4].image = "assets/images/5.png"; //theres a bug
-  } catch (error) {
-    console.log(error);
-  }
-  //invoke createlaptoplist to add selection in our shop
-  createLaptopList();
-};
 //! start fetching data into option list
-fetchLaptops();
+async function getFetchData() {
+  laptops = await fetchApiData.fetchApi();
+  createLaptopList();
+}
+//! start fetching
+getFetchData();
+
 //creates list with api data, create non static 1st option
 const createLaptopList = () => {
   //list options
@@ -162,6 +145,7 @@ const createLaptopList = () => {
   option.text = "Select laptop";
   option.value = "none";
   select.appendChild(option);
+  //more options
   createOptions(laptops);
 
   //when the mapping is done create onchange event and pass the event.target.value to the function
@@ -170,61 +154,27 @@ const createLaptopList = () => {
 
 const createOptions = laptops => {
   laptops.map(laptop => {
-    option = create.option();
+    let option = create.option();
     option.text = laptop.title;
     option.value = laptop.id;
     select.appendChild(option);
   });
 };
 
-//! function e = target.value e.g. 1 2 3 4 so with that will will compare the id
+//! function e = target.value, ignore first option
 async function loadSelectedLaptop(e) {
-  //add condition that avoid first option running this
+  //find where laptop id mathches the event.target.value
   if (e != "none") {
     const selectedLaptop = laptops.find(laptop => laptop.id == e);
-    const { image } = selectedLaptop;
-    //fetch data
-    const images = await fetchImage(image);
+    const { image, price, title } = selectedLaptop;
+    //! second fetch for the images
+    const images = await fetchApiData.fetchImages(image);
+    //call pcdetails from pcShop.js
     showPcDetails(selectedLaptop, images);
+    //we create buyBtn button in pcShop.js and now we add functionality balance will returned
+    buyBtn.addEventListener("click", () => {
+      bankBalance = handlePurchase(price, bankBalance, title);
+      displayBalance();
+    });
   }
 }
-//! second fetch for the images
-const fetchImage = async image_Url => {
-  try {
-    const response = await fetch("https://hickory-quilled-actress.glitch.me/" + image_Url);
-    if (response) return response.url;
-  } catch (error) {
-    console.log(error + " error in fetch...line 210");
-  }
-};
-//! individual data when user clicks the title create html based on it
-const showPcDetails = (selectedLaptop, images) => {
-  const { title, description, price, specs } = selectedLaptop;
-  pcDescription.innerHTML = `
-<h1> ${title} <span>$${price}</span></h1>
-<img class="productImage" width="100px" height="100px" src="${images}"/>
-<h3>${description}.</h3>
-<h3>Features: </h3>
-<ul> 
-${specs
-  .map(spec => {
-    return `<p class="pcList">${spec}</p>`;
-  })
-  .join("")}</ul> 
-  <br>
-<button id="buyBtn" class="buyBtn"> Buy now </button>
-`;
-  buyBtn.addEventListener("click", () => buyPc(title, parseInt(price)));
-  pcDescription.classList.add("pcDescription");
-};
-
-//! when pressing buy pc this will be invoked try to extract from bank
-const buyPc = (title, price) => {
-  if (bankBalance >= price) {
-    bankBalance -= price;
-    displayBalance();
-    alert(`new owner of the laptop -${title}`);
-  } else {
-    alert("you cannot afford that!");
-  }
-};
