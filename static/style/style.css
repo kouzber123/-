@@ -3,8 +3,9 @@
   padding: 2.5px;
 }
 body {
-  padding: 16px;
-  background-color: #1c1917;
+  margin: 6px;
+  padding: 12px;
+  background-color: #292524;
   color: #f5f5f4;
 }
 .content {
@@ -15,6 +16,7 @@ body {
 }
 
 .card {
+
   padding: 16px;
   background-color: #525252;
   margin: 0 auto;
@@ -22,6 +24,7 @@ body {
   flex-grow: 1;
   min-height: 120px;
   box-sizing: border-box;
+  box-shadow: 3px 3px black;
 }
 
 .pcDescription {
@@ -29,7 +32,9 @@ body {
   padding: 16px;
   background-color: #d4d4d4;
   display: grid;
+  box-shadow: 5px 5px rgb(0, 0, 0);
 }
+
 .hideBtn {
   display: none;
 }
@@ -37,11 +42,16 @@ button {
   border-radius: 30px;
   padding: 6px;
 }
+button:hover {
+  background-color: #737373;
+  transition: 0.2s;
+}
 
 li {
   list-style: none;
   float: left;
-  margin-top: 10px;
+  margin-top: 12px;
+  margin-right: 12px;
 }
 .pcList {
   float: none;

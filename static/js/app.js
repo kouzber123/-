@@ -9,18 +9,17 @@ const create = {
 };
 
 //! WORK ELEMENTS
-const giveUserMoney = document.querySelector("#paidMoney");
-const depositElement = document.querySelector("#deposit");
-const payBtnElement = document.querySelector("#paybtn");
-const payBackLoanElement = document.querySelector("#payLoanBtn");
+const showUserMoney = document.querySelector("#paidMoney");
+const depositMoneyButton = document.querySelector("#deposit");
+const payMoneyButton = document.querySelector("#paybtn");
+const payLoanButton = document.querySelector("#payLoanBtn");
 
 //! BANK ELEMENTS
-const bankBalanceElement = document.querySelector("#bankBalance");
-const bankDept = document.querySelector("#bankDept");
-const takeLoanBtnElement = document.querySelector("#takeLoanBtn");
+const showBankBalance = document.querySelector("#bankBalance");
+const showBankDept = document.querySelector("#bankDept");
+const takeLoanButton = document.querySelector("#takeLoanBtn");
 
 //! SHOP ELEMENTS
-const pcOption = document.querySelector("#pcSelect");
 const pcDescription = document.querySelector("#pcDescription");
 const select = document.querySelector("#select");
 
@@ -30,72 +29,80 @@ let bankBalance = 0;
 let currentLoan = 0;
 
 //! Event listeners
-payBtnElement.addEventListener("click", addMoney);
-depositElement.addEventListener("click", handleDeposit);
+payMoneyButton.addEventListener("click", addMoney);
+depositMoneyButton.addEventListener("click", handleDeposit);
 
-//! Shoq user balances
+//! Show user balances
 //shows bank balance
 const displayBalance = () => {
-  bankBalanceElement.innerText = `Balance : ${bankBalance}`;
-  bankDept.innerText = `Dept : ${currentLoan}`;
-  giveUserMoney.innerText = `Pay : $${totalPay}`;
+  showBankBalance.innerText = `Balance : $${bankBalance}`;
+  showBankDept.innerText = `Dept : $${currentLoan}`;
+  showUserMoney.innerText = `Pay : $${totalPay}`;
 };
 
 //! deposit button will disabled at the beginning
-depositElement.disabled = true;
-//! WORK AREA
+depositMoneyButton.disabled = true;
+//! ---------------------------- WORK AREA
 //adds money from work > when money deposit can happen
 function addMoney() {
   totalPay += 100;
-  depositElement.disabled = false;
+  depositMoneyButton.disabled = false;
   displayBalance();
 }
 //! function for 10% rate
-const outstandingloan = () => {
+const createOutStandingLoan = () => {
   const get10percent = totalPay / 10;
   totalPay = totalPay - get10percent;
   currentLoan -= get10percent;
 };
-//! deposit btn if there is loan then we call outstandingloan()
+//! add to bank / deposit btn if there is loan then we call createOutStandingLoan()
 function handleDeposit() {
   if (currentLoan > 0) {
-    outstandingloan();
-  }
+    // loan then take 10%
+    createOutStandingLoan();
+  } //then deposit deposit total pay will be 0 after putting money in
   bankBalance += totalPay;
   totalPay = 0;
-  depositElement.disabled = true;
+  depositMoneyButton.disabled = true;
   displayBalance();
   handleBtnStatus(false);
+  if (currentLoan == 0) {
+    payLoanButton.classList.add("hideBtn");
+    takeLoanButton.classList.remove("hideBtn");
+  } else {
+    payLoanButton.classList.remove("hideBtn");
+  }
 }
 
-//! anon func attached to btn
-payBackLoanElement.addEventListener("click", () => {
+//!  func attached to btn will check alert if user tries to pay dept with 0
+payLoanButton.addEventListener("click", () => {
   if (totalPay == 0) {
     alert("You have to work first to pay loan...");
   }
-  const temp = totalPay - currentLoan;
+
+  const deptLeft = totalPay - currentLoan;
   currentLoan -= totalPay;
   if (currentLoan <= 0) {
-    bankBalance += temp;
+    //extra money will be transferred to bank
+    bankBalance += deptLeft;
     totalPay = 0;
     currentLoan = 0;
-
-    payBackLoanElement.classList.add("hideBtn");
-    takeLoanBtnElement.classList.remove("hideBtn");
   }
+
   displayBalance();
 });
 
-//! BANK AREA
+//!------------------------------ BANK AREA
+
 //! 1. disable buttons only take loan when bankbalance has value > 0
 //hide first
-payBackLoanElement.classList.add("hideBtn");
-takeLoanBtnElement.addEventListener("click", handleLoan);
+payLoanButton.classList.add("hideBtn");
+takeLoanButton.addEventListener("click", handleLoan);
 
 //! disable the button so user cant press initially
 handleBtnStatus(true);
 function handleBtnStatus(bool) {
-  takeLoanBtnElement.disabled = bool;
+  takeLoanButton.disabled = bool;
 }
 //handles taking a loan. statements for taking loan
 function handleLoan() {
@@ -115,16 +122,18 @@ function handleLoan() {
       displayBalance();
       //! hide buttons if loan exists
       if (currentLoan > 0) {
-        payBackLoanElement.classList.remove("hideBtn");
-        takeLoanBtnElement.classList.add("hideBtn");
+        payLoanButton.classList.remove("hideBtn");
+        takeLoanButton.classList.add("hideBtn");
       }
     }
   } else {
     console.log("your funds arent sufficient.");
   }
+  displayBalance();
 }
 
-//! PC SHOP AREA
+//! ----------------------------- PC SHOP AREA
+
 //! 1. first get api data then create option list with map add titles
 //! 2. get event of corresponding value and get detailed details
 //Setup Dom manipulation and fetch
@@ -144,7 +153,7 @@ const fetchLaptops = async () => {
   //invoke createlaptoplist to add selection in our shop
   createLaptopList();
 };
-//! start fetching data
+//! start fetching data into option list
 fetchLaptops();
 //creates list with api data, create non static 1st option
 const createLaptopList = () => {
@@ -176,7 +185,7 @@ async function loadSelectedLaptop(e) {
     const { image } = selectedLaptop;
     //fetch data
     const images = await fetchImage(image);
-    pcDetails(selectedLaptop, images);
+    showPcDetails(selectedLaptop, images);
   }
 }
 //! second fetch for the images
@@ -188,8 +197,8 @@ const fetchImage = async image_Url => {
     console.log(error + " error in fetch...line 210");
   }
 };
-//! individual data when user clicks the title
-const pcDetails = (selectedLaptop, images) => {
+//! individual data when user clicks the title create html based on it
+const showPcDetails = (selectedLaptop, images) => {
   const { title, description, price, specs } = selectedLaptop;
   pcDescription.innerHTML = `
 <h1> ${title} <span>$${price}</span></h1>
