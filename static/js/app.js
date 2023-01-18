@@ -81,6 +81,8 @@ payLoanButton.addEventListener("click", () => {
     bankBalance += deptLeft;
     totalPay = 0;
     currentLoan = 0;
+    payLoanButton.classList.add("hideBtn");
+    depositMoneyButton.disabled = true;
   }
   displayBalance();
 });
